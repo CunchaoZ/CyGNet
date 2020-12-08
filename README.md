@@ -14,10 +14,10 @@ There are four datasets (from [RE-NET](https://github.com/INK-USC/RE-Net)): ICEW
 
 ## Run the experiment
 We first get the historical vocabulary.
-***
+
         python get_historical_vocabulary.py -dataset DATA_NAME
 Then, train the model.
-***
+
         python train.py -dataset ICEWS18 --time-stamp 24 -alpha 0.8 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 3
         python train.py -dataset ICEWS14 --time-stamp 24 -alpha 0.8 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 3
         python train.py -dataset GDELT --time-stamp 15 -alpha 0.7 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 2
