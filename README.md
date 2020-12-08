@@ -10,6 +10,7 @@ Since such temporal knowledge graphs often suffer from incompleteness, it is imp
     pytorch 1.3.0
 
 ## Dataset
+There are four datasets (from [RE-NET](https://github.com/INK-USC/RE-Net)): ICEWS18, ICEWS14, GDELT, WIKI, and YAGO. 
 
 ## Run the experiment
 
