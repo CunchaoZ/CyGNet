@@ -72,7 +72,6 @@ class Copy_mode(nn.Module):
         self.hidden_dim = hidden_dim
 
         self.tanh = nn.Tanh()
-        self.relu = nn.ReLU()
         self.W_s = nn.Linear(hidden_dim * 2, output_dim)
         self.use_cuda = use_cuda
 
@@ -94,12 +93,10 @@ class Generate_mode(nn.Module):
         super(Generate_mode, self).__init__()
         # weights
         self.W_mlp = nn.Linear(hidden_size * 3, output_dim)
-        self.relu = nn.ReLU()
-        self.tanh = nn.Tanh()
 
     def forward(self, ent_embed, rel_embed, tim_embed):
 
         m_t = torch.cat((ent_embed, rel_embed, tim_embed), dim=1)
-        score_g = self.relu(self.W_mlp(m_t))
+        score_g = self.W_mlp(m_t)
 
         return F.softmax(score_g, dim=1)
