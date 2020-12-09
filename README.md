@@ -16,13 +16,13 @@ There are four datasets (from [RE-NET](https://github.com/INK-USC/RE-Net)): ICEW
 We first get the historical vocabulary.
 
     python get_historical_vocabulary.py -dataset DATA_NAME
-Then, train the model.
+Then, train the model and test.
 
-    python train.py -dataset ICEWS18 --time-stamp 24 -alpha 0.8 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 3
-    python train.py -dataset ICEWS14 --time-stamp 24 -alpha 0.8 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 3
-    python train.py -dataset GDELT --time-stamp 15 -alpha 0.7 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 2
-    python train.py -dataset WIKI --time-stamp 1 -alpha 0.7 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 5
-    python train.py -dataset YAGO --time-stamp 1 -alpha 0.7 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 5
+    python train_test.py -dataset ICEWS18 --time-stamp 24 -alpha 0.8 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 3
+    python train_test.py -dataset ICEWS14 --time-stamp 24 -alpha 0.8 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 3
+    python train_test.py -dataset GDELT --time-stamp 15 -alpha 0.7 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 2
+    python train_test.py -dataset WIKI --time-stamp 1 -alpha 0.7 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 5
+    python train_test.py -dataset YAGO --time-stamp 1 -alpha 0.7 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 5
 
 ## Reference
 Bibtex:
