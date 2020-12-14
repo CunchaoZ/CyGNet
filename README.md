@@ -31,5 +31,5 @@ Bibtex:
       title = {Learning from History: Modeling Temporal Knowledge Graphs with Sequential Copy-Generation Networks},
       author = "Zhu, Cunchao and Chen, Muhao and Fan, Changjun and Cheng, Guangquan and Zhang, Yan",
       booktitle = "AAAI",
-      year = "2021",
+      year = "2021"
     }
