@@ -19,8 +19,8 @@ We first get the historical vocabulary.
     python get_historical_vocabulary.py --dataset DATA_NAME
 Then, train the model.
 
-    python train.py --dataset DATA_NAME --entity object --time-stamp 24 -alpha [0.-1.] -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 4
-    python train.py --dataset DATA_NAME --entity subject --time-stamp 24 -alpha [0.-1.] -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 4
+    python train.py --dataset DATA_NAME --entity object --time-stamp 24 -alpha [0.~1.] -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 4
+    python train.py --dataset DATA_NAME --entity subject --time-stamp 24 -alpha [0.~1.] -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 4
 
 Finally, test the model.
 
