@@ -59,8 +59,13 @@ model.to(device)
 
 optimizer = optim.Adam(model.parameters(), lr=args.lr, amsgrad=True)
 
-mkdirs('./results/bestmodel/{}'.format(args.dataset))
-model_state_file = './results/bestmodel/{}/model_state.pth'.format(args.dataset)
+if args.entity == 'object':
+	mkdirs('./results/bestmodel/{}'.format(args.dataset))
+	model_state_file = './results/bestmodel/{}/model_state.pth'.format(args.dataset)
+if args.entity == 'subject':
+	mkdirs('./results/bestmodel/{}_sub'.format(args.dataset))
+	model_state_file = './results/bestmodel/{}_sub/model_state.pth'.format(args.dataset)
+
 forward_time = []
 backward_time = []
 
@@ -87,7 +92,10 @@ for i in range(args.n_epochs):
 
 		if train_samples_tim > 0:
 			train_tim = train_times[train_samples_tim-1]
-			tim_tail_seq = sp.load_npz('./data/{}/copy_seq/train_h_r_copy_seq_{}.npz'.format(args.dataset, train_times[train_samples_tim-1]))
+			if args.entity == 'object':
+				tim_tail_seq = sp.load_npz('./data/{}/copy_seq/train_h_r_copy_seq_{}.npz'.format(args.dataset, train_times[train_samples_tim - 1]))
+			if args.entity == 'subject':
+				tim_tail_seq = sp.load_npz('./data/{}/copy_seq_sub/train_h_r_copy_seq_{}.npz'.format(args.dataset, train_times[train_samples_tim - 1]))
 			all_tail_seq = all_tail_seq + tim_tail_seq
 
 		train_sample_data = train_data[sample_read:sample_end, :]
@@ -98,8 +106,13 @@ for i in range(args.n_epochs):
 			batch_end = min(train_sample_data.shape[0], (idx + 1) * batch_size)
 			train_batch_data = train_sample_data[batch_start: batch_end]
 
-			labels = torch.LongTensor(train_batch_data[:, 2])
-			seq_idx = train_batch_data[:, 0] * num_r + train_batch_data[:, 1]
+			if args.entity == 'object':
+				labels = torch.LongTensor(train_batch_data[:, 2])
+				seq_idx = train_batch_data[:, 0] * num_r + train_batch_data[:, 1]
+			if args.entity == 'subject':
+				labels = torch.LongTensor(train_batch_data[:, 0])
+				seq_idx = train_batch_data[:, 2] * num_r + train_batch_data[:, 1]
+
 			tail_seq = torch.Tensor(all_tail_seq[seq_idx].todense())
 			one_hot_tail_seq = tail_seq.masked_fill(tail_seq != 0, 1)
 
@@ -107,7 +120,7 @@ for i in range(args.n_epochs):
 				labels, one_hot_tail_seq = labels.to(device), one_hot_tail_seq.to(device)
 
 			t0 = time.time()
-			score = model(train_batch_data, one_hot_tail_seq)
+			score = model(train_batch_data, one_hot_tail_seq, entity=args.entity)
 
 			loss = F.nll_loss(score, labels) + model.regularization_loss(reg_param=0.01)
 
@@ -132,8 +145,10 @@ for i in range(args.n_epochs):
 
 		dev_sample_read = 0
 		dev_sample_end = 0
-
-		tim_tail_seq = sp.load_npz('./data/{}/copy_seq/train_h_r_copy_seq_{}.npz'.format(args.dataset, train_times[-1]))
+		if args.entity == 'object':
+			tim_tail_seq = sp.load_npz('./data/{}/copy_seq/train_h_r_copy_seq_{}.npz'.format(args.dataset, train_times[-1]))
+		if args.entity == 'subject':
+			tim_tail_seq = sp.load_npz('./data/{}/copy_seq_sub/train_h_r_copy_seq_{}.npz'.format(args.dataset, train_times[-1]))
 		all_tail_seq = all_tail_seq + tim_tail_seq
 
 		n_batch = (dev_data.shape[0] + batch_size - 1) // batch_size
@@ -143,21 +158,30 @@ for i in range(args.n_epochs):
 			batch_end = min(dev_data.shape[0], (idx + 1) * batch_size)
 			dev_batch_data = dev_data[batch_start: batch_end]
 
-			dev_label = torch.LongTensor(dev_batch_data[:, 2])
-			seq_idx = dev_batch_data[:, 0] * num_r + dev_batch_data[:, 1]
+			if args.entity == 'object':
+				dev_label = torch.LongTensor(dev_batch_data[:, 2])
+				seq_idx = dev_batch_data[:, 0] * num_r + dev_batch_data[:, 1]
+			if args.entity == 'subject':
+				dev_label = torch.LongTensor(dev_batch_data[:, 0])
+				seq_idx = dev_batch_data[:, 2] * num_r + dev_batch_data[:, 1]
 
 			tail_seq = torch.Tensor(all_tail_seq[seq_idx].todense())
 			one_hot_tail_seq = tail_seq.masked_fill(tail_seq != 0, 1)
 
 			if use_cuda:
 				dev_label, one_hot_tail_seq = dev_label.to(device), one_hot_tail_seq.to(device)
-			dev_score = model(dev_batch_data, one_hot_tail_seq)
+			dev_score = model(dev_batch_data, one_hot_tail_seq, entity=args.entity)
 			
 			if args.raw:
 				tim_mrr, tim_hits1, tim_hits3, tim_hits10 = calc_raw_mrr(dev_score, dev_label, hits=[1, 3, 10])
 			else:
-				tim_mrr, tim_hits1, tim_hits3, tim_hits10 = calc_filtered_mrr(num_e, dev_score, torch.LongTensor(train_data),
-																				  torch.LongTensor(dev_data),torch.LongTensor(dev_batch_data),hits=[1, 3, 10])				
+				tim_mrr, tim_hits1, tim_hits3, tim_hits10 = calc_filtered_mrr(num_e, 
+											      dev_score, 
+											      torch.LongTensor(train_data),
+										              torch.LongTensor(dev_data),
+											      torch.LongTensor(dev_batch_data),
+											      entity=args.entity,
+											      hits=[1, 3, 10])
 
 			mrr += tim_mrr * len(dev_batch_data)
 			hits1 += tim_hits1 * len(dev_batch_data)
@@ -199,59 +223,3 @@ writer.close()
 print("training done")
 print("Mean forward time: {:4f}s".format(np.mean(forward_time)))
 print("Mean Backward time: {:4f}s".format(np.mean(backward_time)))
-
-print("\nstart testing:")
-# use best model checkpoint
-checkpoint = torch.load(model_state_file)
-#if use_cuda:
-	#model.cpu()  # test on CPU
-model.train()
-model.load_state_dict(checkpoint['state_dict'])
-print("Using best epoch: {}".format(checkpoint['epoch']))
-
-test_mrr, test_hits1, test_hits3, test_hits10 = 0, 0, 0, 0
-n_batch = (test_data.shape[0] + batch_size - 1) // batch_size
-
-for idx in range(n_batch):
-	batch_start = idx * batch_size
-	batch_end = min(test_data.shape[0], (idx + 1) * batch_size)
-	test_batch_data = test_data[batch_start: batch_end]
-
-	test_label = torch.LongTensor(test_batch_data[:, 2])
-	seq_idx = test_batch_data[:, 0] * num_r + test_batch_data[:, 1]
-
-	tail_seq = torch.Tensor(all_tail_seq[seq_idx].todense())
-	one_hot_tail_seq = tail_seq.masked_fill(tail_seq != 0, 1)
-
-	if use_cuda:
-		test_label, one_hot_tail_seq = test_label.to(device), one_hot_tail_seq.to(device)
-	test_score = model(test_batch_data, one_hot_tail_seq)
-	
-	if args.raw:
-		tim_mrr, tim_hits1, tim_hits3, tim_hits10 = calc_raw_mrr(test_score, test_label, hits=[1, 3, 10])
-	else:
-		tim_mrr, tim_hits1, tim_hits3, tim_hits10 = calc_filtered_test_mrr(num_e, test_score,
-																		  torch.LongTensor(
-																			  train_data),
-																		  torch.LongTensor(
-																			  dev_data),
-																		  torch.LongTensor(
-																			  test_data),
-																		  torch.LongTensor(
-																			  test_batch_data),
-																		  hits=[1, 3, 10])
-
-	test_mrr += tim_mrr * len(test_batch_data)
-	test_hits1 += tim_hits1 * len(test_batch_data)
-	test_hits3 += tim_hits3 * len(test_batch_data)
-	test_hits10 += tim_hits10 * len(test_batch_data)
-
-test_mrr = test_mrr / test_data.shape[0]
-test_hits1 = test_hits1 / test_data.shape[0]
-test_hits3 = test_hits3 / test_data.shape[0]
-test_hits10 = test_hits10 / test_data.shape[0]
-
-print("test-- Epoch {:04d} | Best MRR {:.4f} | Hits@1 {:.4f} | Hits@3 {:.4f} | Hits@10 {:.4f}".
-	  format(checkpoint['epoch'], test_mrr, test_hits1, test_hits3, test_hits10))
-
-print('end')
