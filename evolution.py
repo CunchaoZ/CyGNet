@@ -37,6 +37,19 @@ def calc_raw_mrr(score, labels, hits=[]):
 #
 #######################################################################
 
+def filter_h(triplets_to_filter, target_h, target_r, target_t, num_entities):
+    target_h, target_r, target_t = int(target_h), int(target_r), int(target_t)
+    filtered_h = []
+
+    # Do not filter out the test triplet, since we want to predict on it
+    if (target_h, target_r, target_t) in triplets_to_filter:
+        triplets_to_filter.remove((target_h, target_r, target_t))
+    # Do not consider an object if it is part of a triplet to filter
+    for h in range(num_entities):
+        if (h, target_r, target_t) not in triplets_to_filter:
+            filtered_h.append(h)
+    return torch.LongTensor(filtered_h)
+
 def filter_t(triplets_to_filter, target_h, target_r, target_t, num_entities):
     target_h, target_r, target_t = int(target_h), int(target_r), int(target_t)
     filtered_t = []
@@ -50,24 +63,32 @@ def filter_t(triplets_to_filter, target_h, target_r, target_t, num_entities):
             filtered_t.append(t)
     return torch.LongTensor(filtered_t)
 
-def get_filtered_rank(num_entity, score, h, r, t, test_size, triplets_to_filter):
+def get_filtered_rank(num_entity, score, h, r, t, test_size, triplets_to_filter, entity):
     """ Perturb object in the triplets
     """
     num_entities = num_entity
     ranks = []
+
     for idx in range(test_size):
         target_h = h[idx]
         target_r = r[idx]
         target_t = t[idx]
         # print('t',target_t)
-        filtered_t = filter_t(triplets_to_filter, target_h, target_r, target_t, num_entities)
-        target_t_idx = int((filtered_t == target_t).nonzero())
-        _, indices = torch.sort(score[idx][filtered_t], descending=True)
-        rank = int((indices == target_t_idx).nonzero())
+        if entity == 'object':
+            filtered_t = filter_t(triplets_to_filter, target_h, target_r, target_t, num_entities)
+            target_t_idx = int((filtered_t == target_t).nonzero())
+            _, indices = torch.sort(score[idx][filtered_t], descending=True)
+            rank = int((indices == target_t_idx).nonzero())
+        if entity == 'subject':
+            filtered_h = filter_h(triplets_to_filter, target_h, target_r, target_t, num_entities)
+            target_h_idx = int((filtered_h == target_h).nonzero())
+            _, indices = torch.sort(score[idx][filtered_h], descending=True)
+            rank = int((indices == target_h_idx).nonzero())
+
         ranks.append(rank)
     return torch.LongTensor(ranks)
 
-def calc_filtered_mrr(num_entity, score, train_triplets, valid_triplets, test_triplets, hits=[]):
+def calc_filtered_mrr(num_entity, score, train_triplets, valid_triplets, test_triplets, entity, hits=[]):
     with torch.no_grad():
         h = test_triplets[:, 0]
         r = test_triplets[:, 1]
@@ -82,7 +103,7 @@ def calc_filtered_mrr(num_entity, score, train_triplets, valid_triplets, test_tr
 
         triplets_to_filter = {tuple(triplet) for triplet in triplets_to_filter}
 
-        ranks = get_filtered_rank(num_entity, score, h, r, t, test_size, triplets_to_filter)
+        ranks = get_filtered_rank(num_entity, score, h, r, t, test_size, triplets_to_filter, entity)
 
         ranks += 1 # change to 1-indexed
 
@@ -94,7 +115,7 @@ def calc_filtered_mrr(num_entity, score, train_triplets, valid_triplets, test_tr
 
     return mrr.item(), hits1.item(), hits3.item(), hits10.item()
 
-def calc_filtered_test_mrr(num_entity, score, train_triplets, valid_triplets, valid_triplets2, test_triplets, hits=[]):
+def calc_filtered_test_mrr(num_entity, score, train_triplets, valid_triplets, valid_triplets2, test_triplets, entity, hits=[]):
     with torch.no_grad():
         h = test_triplets[:, 0]
         r = test_triplets[:, 1]
@@ -110,7 +131,7 @@ def calc_filtered_test_mrr(num_entity, score, train_triplets, valid_triplets, va
 
         triplets_to_filter = {tuple(triplet) for triplet in triplets_to_filter}
 
-        ranks = get_filtered_rank(num_entity, score, h, r, t, test_size, triplets_to_filter)
+        ranks = get_filtered_rank(num_entity, score, h, r, t, test_size, triplets_to_filter, entity)
 
         ranks += 1 # change to 1-indexed
 
