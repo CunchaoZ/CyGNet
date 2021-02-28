@@ -11,10 +11,11 @@ args.add_argument("--gpu", type=int, default=0,
 args.add_argument("--regularization", type=float, default=0.01,
                     help="regularization weight")
 args.add_argument('--valid-epoch', type=int, default=5)
-args.add_argument('--alpha', type=float, default=0.7)
+args.add_argument('--alpha', type=float, default=0.5)
 args.add_argument('--batch-size', type=int, default=1024)
 args.add_argument('--raw', action='store_true', default=False)
-args.add_argument('--counts', type=int, default=3)
+args.add_argument('--counts', type=int, default=4)
+args.add_argument('--entity', type=str, default='subject')
 
 args = args.parse_args()
 print(args)
