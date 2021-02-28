@@ -48,7 +48,8 @@ def get_data_with_t(data, tim):
 train_data, train_times = load_quadruples('./data/{}'.format(args.dataset), 'train.txt')
 num_e, num_r = get_total_number('./data/{}'.format(args.dataset), 'stat.txt')
 
-save_dir = './data/{}/copy_seq/'.format(args.dataset)
+save_dir_obj = './data/{}/copy_seq/'.format(args.dataset)
+save_dir_sub = './data/{}/copy_seq_sub/'.format(args.dataset)
 
 def mkdirs(path):
 	if not os.path.exists(path):
@@ -58,8 +59,15 @@ mkdirs(save_dir)
 
 for tim in tqdm(train_times):
     train_new_data = np.array([[quad[0], quad[1], quad[2], quad[3]] for quad in train_data if quad[3] == tim])
+    # get object entities
     row = train_new_data[:, 0] * num_r + train_new_data[:, 1]
     col = train_new_data[:, 2]
     d = np.ones(len(row))
     tail_seq = sp.csr_matrix((d, (row, col)), shape=(num_e * num_r, num_e))
     sp.save_npz('./data/{}/copy_seq/train_h_r_copy_seq_{}.npz'.format(args.dataset, tim), tail_seq)
+    # get subject_entities
+    row1 = train_new_data[:, 2] * num_r + train_new_data[:, 1]
+    col1 = train_new_data[:, 0]
+    d1 = np.ones(len(row1))
+    tail_seq_sub = sp.csr_matrix((d1, (row1, col1)), shape=(num_e * num_r, num_e))
+    sp.save_npz('./data/{}/copy_seq_sub/train_h_r_copy_seq_{}.npz'.format(args.dataset, tim), tail_seq_sub)
