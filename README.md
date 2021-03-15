@@ -19,9 +19,21 @@ We first get the historical vocabulary.
     python get_historical_vocabulary.py --dataset DATA_NAME
 Then, train the model.
 
-    python train.py --dataset DATA_NAME --entity object --time-stamp 24 -alpha [0.~1.] -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 4
-    python train.py --dataset DATA_NAME --entity subject --time-stamp 24 -alpha [0.~1.] -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 4
+    python train.py --dataset ICEWS18 --entity object --time-stamp 24 -alpha 0.8 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 4 --valid-epoch 5
+    python train.py --dataset ICEWS18 --entity subject --time-stamp 24 -alpha 0.8 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 4 --valid-epoch 5
 
+    python train.py --dataset ICEWS14 --entity object --time-stamp 24 -alpha 0.8 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 4 --valid-epoch 5
+    python train.py --dataset ICEWS14 --entity subject --time-stamp 24 -alpha 0.8 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 4 --valid-epoch 5
+    
+    python train.py --dataset GDELT --entity object --time-stamp 15 -alpha 0.7 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 2 --valid-epoch 1
+    python train.py --dataset GDELT --entity subject --time-stamp 15 -alpha 0.7 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 2 --valid-epoch 1
+    
+    python train.py --dataset YAGO --entity object --time-stamp 1 -alpha 0.5 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 4 --valid-epoch 5
+    python train.py --dataset YAGO --entity subject --time-stamp 1 -alpha 0.5 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 4 --valid-epoch 5
+    
+    python train.py --dataset WIKI --entity object --time-stamp 1 -alpha 0.5 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 4 --valid-epoch 5
+    python train.py --dataset WIKI --entity subject --time-stamp 1 -alpha 0.5 -lr 0.001 --n-epoch 30 --hidden-dim 200 -gpu 0 --batch-size 1024 --counts 4 --valid-epoch 5
+    
 Finally, test the model.
 
     python test.py --dataset DATA_NAME
