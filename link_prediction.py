@@ -14,6 +14,7 @@ class link_prediction(nn.Module):
         self.i_dim = i_dim
         self.h_dim = h_dim
         self.num_rels = num_rels
+        self.num_times = num_times
         self.use_cuda = use_cuda
 
         self.ent_init_embeds = nn.Parameter(torch.Tensor(i_dim, h_dim))
