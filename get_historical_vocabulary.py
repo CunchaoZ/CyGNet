@@ -56,7 +56,7 @@ def mkdirs(path):
 		os.makedirs(path)
 
 mkdirs(save_dir_obj)
-mkdirs(svae_dir_sub)
+mkdirs(save_dir_sub)
 
 for tim in tqdm(train_times):
     train_new_data = np.array([[quad[0], quad[1], quad[2], quad[3]] for quad in train_data if quad[3] == tim])
