@@ -42,8 +42,9 @@ def get_total_number(inPath, fileName):
             return int(line_split[0]), int(line_split[1])
 
 def get_data_with_t(data, tim):
-    triples = [[quad[0], quad[1], quad[2]] for quad in data if quad[3] == tim]
-    return np.array(triples)
+    x = data[np.where(data[3] == tim)].copy()
+    x = np.delete(x, 3, 1) # drops 3rd column
+    return x
 
 train_data, train_times = load_quadruples('./data/{}'.format(args.dataset), 'train.txt')
 num_e, num_r = get_total_number('./data/{}'.format(args.dataset), 'stat.txt')
@@ -59,7 +60,7 @@ mkdirs(save_dir_obj)
 mkdirs(save_dir_sub)
 
 for tim in tqdm(train_times):
-    train_new_data = np.array([[quad[0], quad[1], quad[2], quad[3]] for quad in train_data if quad[3] == tim])
+    train_new_data = train_data[np.where(train_data[3] == tim)].copy()
     # get object entities
     row = train_new_data[:, 0] * num_r + train_new_data[:, 1]
     col = train_new_data[:, 2]
